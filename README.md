@@ -2,4 +2,11 @@
 Repository containing scripts and resources for the participant exercise at the 2025 Data Management Virtual Workshop.
 
 Western Snowy Plover Excercises 
-`usethis::use_course("https://github.com/jcochran-usfws/Quarto_Exercise-2025_Data_Management_Workshop/archive/refs/heads/master.zip")`
+```usethis::use_course("https://github.com/jcochran-usfws/Quarto_Exercise-2025_Data_Management_Workshop/archive/refs/heads/master.zip")```
+
+Test
+```
+function test() {
+  console.log("[This code will have a copy button to the right of it](https://github.com/jcochran-usfws/Quarto_Exercise-2025_Data_Management_Workshop/archive/refs/heads/master.zip)");
+}
+```
