@@ -4,6 +4,8 @@ execute:
   echo: false
   warning: false
   error: false
+params:
+  Site: "Agate Beach"
 ---
 
 ```{r}
@@ -14,7 +16,7 @@ execute:
 
 # Create vector of packages
 
-requiredPackages <- c("tidyverse", "readxl", "gt", "sf", "ggrepel", "knitr")
+requiredPackages <- c("tidyverse", "readxl", "gt", "sf", "ggrepel", "knitr", "magrittr")
 
 # Function to install and load any packages not installed
 
@@ -36,7 +38,8 @@ ipak(requiredPackages)
 
 # Read excel data from the Projects "Data" folder. 
 
-data <- read_excel("../../Data/Western_Snowy_Plover_Window_Survey_dataset.xlsx") # Read in our downloaded plover dataset.
+data <- read_excel("../../Data/Western_Snowy_Plover_Window_Survey_dataset.xlsx") %>% # Read in our downloaded plover dataset.
+  filter(Site == params$Site) # Filter dataset by survey site
 head(data) # Show the first few rows of data.
 
 # Read shapefile data from the Projects "Data" folder. 
@@ -46,13 +49,13 @@ boundary_sf <- st_read(dsn = "../../Data/us-state-boundaries")
 
 ## U.S. Fish and Wildlife Service
 
-### Western Snowy Plover Exercise - Master
+### Annual Western Snowy Plover Survey
 
-#### Annual Report
+#### `r params$Site` Report
 
 ##### Survey Summary
 
-A total of `r nrow(data)` individual western snowy plover (**Charadrius nivosus nivosus**) surveys were conducted during the annual U.S. Fish and Wildlife Service seasonal west coast plover survey. Surveys were conducted at `r combine_words(unique(data$Site))` sites, historically surveyed locations during the survey. In total, `r sum(data$Total)` plovers were observed during the survey over the course of `r round(sum(data$'Duration (Hours)'), 2)` observational hours.
+A total of `r nrow(data)` individual western snowy plover (**Charadrius nivosus nivosus**) surveys were conducted at `r params$Site` during the annual U.S. Fish and Wildlife Service seasonal survey. In total, `r sum(data$Total)` plovers were observed during the survey over the course of `r round(sum(data$Duration_Hours), 2)` observational hours.
 
 ##### Introduction
 
@@ -68,7 +71,7 @@ Observations were conducted during both summer and winter seasons to gather comp
 
 ```{r}
 #| label: Survey Site Map
-#| fig-cap: "Figure 1. Map of Western Snowy Plover survey locations along the coastline."
+#| fig-cap: !expr paste0("Figure 1. Map of Western Snowy Plover survey locations at the ", params$Site, " survey location.")
 #| output: asis
 
 Plover_points <- data %>%
@@ -94,19 +97,13 @@ Site_map <- ggplot() +
 Site_map # calls the map to be plotted
 ```
 
-##### Results
-
-The data on Western Snowy Plover total counts indicate notable seasonal and site-specific trends. In the summer, Leadbetter Point had the highest population, with a total count of 85 individuals, followed by Agate Beach with 56, while Bayshore Spit had the lowest at 24 (table 1). This suggests that Leadbetter Point and Agate Beach are critical breeding areas. In contrast, winter counts showed a significant decline across all sites, with Agate Beach recording 25 plovers, Leadbetter Point 21, and Bayshore Spit 19. The decrease in overall counts during the winter season, especially the absence of juveniles, highlights the migratory behavior of the plovers and underscores the importance of these habitats for both breeding and wintering populations.
-
-Furthermore, observational plover counts per hour reveal significant seasonal trends across the sites. In the summer, Leadbetter Point had the highest observation rate at 10.97 plovers per hour, indicating a robust presence during the breeding season, followed closely by Agate Beach with 8.3 observations per hour (figure 2). Bayshore Spit had the lowest summer observation rate at 3.0, suggesting it is less frequented by plovers during this time. Conversely, winter counts showed a marked reduction in observational rates across all sites, with Agate Beach recording 3.33 observations per hour, Leadbetter Point at 2.9, and Bayshore Spit at 2.05. This decline underscores the migratory patterns and decreased visibility of the plovers during the non-breeding season, highlighting the importance of seasonal monitoring to understand the dynamics of plover populations in these habitats.
-
 ```{r}
-#| label: Plover Observation Summary Table
-#| fig-cap: "Table 1. Seasonal Western Snowy Plover observational counts by survey site."
+#| label: Figure Data Manipulation
 
+## Plover Counts Summary
 # Group by Survey Season and Site, and summarize Total Plover counts
 Obs_data <- data %>%
-  group_by(`Survey Season`, Site) %>%
+  group_by(Survey_Season, Site) %>%
   summarise(Total_Males = sum(Males),
             Total_Females = sum(Females),
             Total_Juveniles = sum(Juveniles),
@@ -114,10 +111,29 @@ Obs_data <- data %>%
             .groups = 'drop') %>%
   arrange(Site)  # Arrange by Site
 
+## Plover Observations per Hour
+# Group by Survey Season and Site, and summarize Total Plover counts by duration (hours)
+Effort_data <- data %>%
+  group_by(Survey_Season, Site) %>%
+  summarise(Obs_Hour = round(sum(Total)/sum(Duration_Hours), 2)) %>%
+  arrange(Site)  # Arrange by Site
+```
+
+##### Results
+
+The data on Western Snowy Plover total counts indicate notable seasonal trends. In the summer, `r params$Site` had a total observational count of `r Obs_data %>% filter(Survey_Season == "Summer") %>% extract2(6)` plovers (table 1). The winter survey resuted in a total observational count of `r Obs_data %>% filter(Survey_Season == "Winter") %>% extract2(6)` plovers. Regardless of season, these results show usage by plovers during both seaons and highlights the migratory behavior of the plovers and underscores the importance of these habitats for both breeding and wintering populations.
+
+Furthermore, observational plover counts per hour reveal significant seasonal trends across the site. In the summer, `r params$Site` had an observation rate of `r Effort_data %>% filter(Survey_Season == "Summer") %>% extract2(3)` plovers per hour. The winter survey saw an observation rate of `r Effort_data %>% filter(Survey_Season == "Winter") %>% extract2(3)` plovers per hour. Although observation rates were highest in the `r Effort_data %>% ungroup() %>% slice(which.max(Obs_Hour)) %>% extract2(1)` season, seasonal monitoring remains important to understand the dynamics of plover populations in these habitats.
+
+```{r}
+#| label: Plover Observation Summary Table
+#| fig-cap: !expr paste0("Table 1. Seasonal Western Snowy Plover observational counts at the ", params$Site, " survey location.")
+
 # Create a gt table
 Obs_table <- Obs_data %>%
   gt() %>%
   cols_label(
+    Survey_Season = "Survey Season",
     Total_Males = "Total Males",
     Total_Females = "Total Females",
     Total_Juveniles = "Total Juveniles",
@@ -130,17 +146,11 @@ Obs_table
 
 ```{r}
 #| label: Plover Observation per Hour Plot
-#| fig-cap: "Figure 2. Text."
-
-# Group by Survey Season and Site, and summarize Total Plover counts by duration (hours)
-Effort_data <- data %>%
-  group_by(`Survey Season`, Site) %>%
-  summarise(Obs_Hour = round(sum(Total)/sum(`Duration (Hours)`), 2)) %>%
-  arrange(Site)  # Arrange by Site
+#| fig-cap: !expr paste0("Figure 2. Seasonal Western Snowy Plover observation rates (per hour) at the ", params$Site, " survey location.")
 
 # Create a ggplot
 Effort_plot <- Effort_data %>%
-  ggplot(., aes(x = Site, y = Obs_Hour, fill = `Survey Season`)) +
+  ggplot(., aes(x = Site, y = Obs_Hour, fill = Survey_Season)) +
   geom_bar(stat = "identity", color = "black", position = position_dodge()) +
   scale_fill_manual(values = c('#e5a300','#0487ee')) +
   labs(x = "", y = "Plover Observations per Hour") +
