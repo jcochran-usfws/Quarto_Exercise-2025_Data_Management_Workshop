@@ -1,0 +1,7 @@
+"0","#| label: Data Import"
+"0","#| output: false"
+"0",""
+"0","# Read excel data from the Projects ""Data"" folder. "
+"0",""
+"0","data <- read_excel(""../../Data/Western_Snowy_Plover_Window_Survey_dataset.xlsx"") # Read in our downloaded plover dataset."
+"0","head(data) # Show the first few rows of data."

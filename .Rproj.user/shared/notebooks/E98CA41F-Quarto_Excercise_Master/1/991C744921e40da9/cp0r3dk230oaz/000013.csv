@@ -1,0 +1,7 @@
+"2","Warning in gzfile(file, ""wb"") :"
+"2","
+ "
+"2"," cannot open compressed file 'C:/Users/jcochran/OneDrive - DOI/Desktop/R Markdown - Quarto Workshops/2025 Virtual Course/Quarto_Exercise-2025_Data_Management_Workshop/.Rproj.user/shared/notebooks/E98CA41F-Quarto_Excercise_Master/1/991C744921e40da9/cp0r3dk230oaz_t/22f0df73efc54f61a64d1b04f2e7c7cb.snapshot', probable reason 'No such file or directory'
+"
+"2","Error in gzfile(file, ""wb"") : cannot open the connection
+"
