@@ -1,5 +1,7 @@
 ---
-format: docx
+format: 
+  docx:
+   reference-doc: Plover_Exercise_MS_Word_Styles_Template.docx
 execute: 
   echo: false
   warning: false
