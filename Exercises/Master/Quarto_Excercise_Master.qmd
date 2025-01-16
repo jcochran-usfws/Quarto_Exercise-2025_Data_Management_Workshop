@@ -151,19 +151,26 @@ Obs_table
 
 ```{r}
 #| label: Plover Observation per Hour Plot
-#| fig-cap: !expr paste0("Figure 2. Seasonal Western Snowy Plover observation rates (per hour) at the ", params$Site, " survey location.")
+#| fig-cap: !expr paste0("Figure 2. Mean Monthly Western Snowy Plover observation rates (per hour) at the ", params$Site, " survey location.")
 
-# Create a ggplot
-Effort_plot <- Effort_data %>%
-  ggplot(., aes(x = Site, y = Obs_Hour, fill = Survey_Season)) +
-  geom_bar(stat = "identity", color = "black", position = position_dodge()) +
-  scale_fill_manual(values = c('#e5a300','#0487ee')) +
-  labs(x = "", y = "Plover Observations per Hour") +
+
+# Stacked bar chart with ggplot
+
+catch_time_data <- data %>% 
+  select(Site, Date, Duration_Hours, Males, Females, Juveniles) %>%
+  mutate(Mcpue=Males/Duration_Hours,Fcpue=Females/Duration_Hours, Jcpue=Juveniles/Duration_Hours ) %>%  
+  mutate(Month= month(Date, label=TRUE)) %>% 
+  select(Male = Mcpue, Female=Fcpue, Juvenile=Jcpue , Month) %>%
+  pivot_longer(cols = Male:Juvenile, names_to = "Maturity", values_to = "cpue") %>% 
+  group_by(Month, Maturity) %>% summarize(meanCPUE=mean(cpue), .groups = "keep")
+
+cpue_plot <- ggplot(catch_time_data,aes(x=Month, y=meanCPUE))+geom_col(aes(fill=Maturity),color = "black")+
+  scale_fill_manual(values = c('#fc8d59','#ffffbf','#91bfdb' )) +
+  labs(x = "", y = "Mean Observations per Hour") +
   theme_classic() +
   theme(axis.text = element_text(color = "black", size = 10))
 
-# Print the plot
-Effort_plot
+cpue_plot
 ```
 
 ##### Discussion
