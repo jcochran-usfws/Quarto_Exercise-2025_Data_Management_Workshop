@@ -1,10 +1,5 @@
 ---
-title: "Test"
-author: "Your Name"
-Date: 
-format: 
-  docx:
-   reference-doc: MS_Style.docx
+format: docx
 execute: 
   echo: false
   warning: false
