@@ -72,7 +72,7 @@ Annual observation surveys are essential for informing management strategies aim
 
 The annual surveys of western snowy plovers employed systematic observational methods to ensure accurate counts and assessments of the population. Observers conducted visual counts using binoculars while walking along designated survey areas, which included sandy beaches and the lower portions of rivers and tributaries located in close proximity to the coast (figure 1). This approach allowed for a thorough examination of the habitat where snowy plovers are typically found, enhancing the likelihood of detecting individuals and nests. To maintain consistency and accuracy, survey routes were predetermined, and observers followed established protocols to minimize disturbance to the birds while still capturing essential data.
 
-Observations were conducted during both summer and winter seasons to gather comprehensive information on the breeding and migratory populations of western snowy plovers at the survey sites. During the summer months, surveys focused on identifying nesting sites and assessing breeding success, while winter surveys aimed to document the abundance and distribution of migratory plovers that utilize these coastal environments. 
+Observations were conducted during both summer and winter seasons to gather comprehensive information on the breeding and migratory populations of western snowy plovers at the survey sites. During the summer months, surveys focused on identifying nesting sites and assessing breeding success, while winter surveys aimed to document the abundance and distribution of migratory plovers that utilize these coastal environments.
 
 ```{r}
 #| label: Survey Site Map
@@ -151,11 +151,12 @@ Obs_table
 
 ```{r}
 #| label: Plover Observation per Hour Plot
+#| include: true
 #| fig-cap: !expr paste0("Figure 2. Mean Monthly Western Snowy Plover observation rates (per hour) at the ", params$Site, " survey location.")
 
 
 # Stacked bar chart with ggplot
-
+### Restructure data for stacked barplot 
 catch_time_data <- data %>% 
   select(Site, Date, Duration_Hours, Males, Females, Juveniles) %>%
   mutate(Mcpue=Males/Duration_Hours,Fcpue=Females/Duration_Hours, Jcpue=Juveniles/Duration_Hours ) %>%  
@@ -163,11 +164,10 @@ catch_time_data <- data %>%
   select(Male = Mcpue, Female=Fcpue, Juvenile=Jcpue , Month) %>%
   pivot_longer(cols = Male:Juvenile, names_to = "Maturity", values_to = "cpue") %>% 
   group_by(Month, Maturity) %>% summarize(meanCPUE=mean(cpue), .groups = "keep")
-
+### The Plot
 cpue_plot <- ggplot(catch_time_data,aes(x=Month, y=meanCPUE))+geom_col(aes(fill=Maturity),color = "black")+
   scale_fill_manual(values = c('#fc8d59','#ffffbf','#91bfdb' )) +
   labs(x = "", y = "Mean Observations per Hour") +
-  theme_classic() +
   theme(axis.text = element_text(color = "black", size = 10))
 
 cpue_plot
